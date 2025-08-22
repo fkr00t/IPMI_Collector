@@ -1,0 +1,23 @@
+# Konfigurasi target untuk Prometheus - IPMI Collector dengan ipmitool
+# Tambahkan ini ke file prometheus.yml di VM Prometheus
+# Kompatibel dengan Dashboard Grafana ID: 13177 (IPMI for Prometheus)
+#
+# PENTING: Ganti "YOUR_IPMI_COLLECTOR_IP" dengan IP server yang menjalankan ipmi_collector.sh
+
+scrape_configs:
+  # IPMI Collector - Custom dengan ipmitool
+  - job_name: 'ipmi-custom'
+    static_configs:
+      - targets:
+        - '<IP_SERVER>:8000'  # IP server yang menjalankan ipmi_collector.sh
+        
+    scrape_interval: 30s
+    scrape_timeout: 25s
+    metrics_path: /metrics
+    
+    # Relabeling untuk kompatibilitas dengan dashboard 13177
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+):.*'
+        replacement: '${1}'
