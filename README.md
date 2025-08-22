@@ -1,13 +1,13 @@
 # IPMI Collector untuk Prometheus
 
-Sistem monitoring IPMI custom menggunakan `ipmitool` yang kompatibel dengan Prometheus dan Grafana Dashboard ID 13177.
+Sistem monitoring IPMI custom menggunakan `ipmitool` yang kompatibel dengan Prometheus dan Grafana Dashboard custom.
 
 ## 🚀 Fitur
 
 - **Multi-Server Monitoring**: Support untuk 12+ server dengan kredensial berbeda
 - **Custom Metrics**: Temperature, Voltage, Fan Speed, Power Consumption, dan Sensor State
 - **Prometheus Compatible**: Format metrics yang sesuai dengan Prometheus
-- **Grafana Ready**: Kompatibel dengan Dashboard Grafana ID 13177
+- **Custom Grafana Dashboard**: Dashboard custom dengan template variable untuk multi-server
 - **Robust Error Handling**: Timeout dan error handling yang baik
 - **HTTP Endpoint**: Endpoint `/metrics` untuk Prometheus scraping
 
@@ -15,9 +15,10 @@ Sistem monitoring IPMI custom menggunakan `ipmitool` yang kompatibel dengan Prom
 
 ```
 IPMI_Collector/
-├── ipmi_collector.sh          # Script utama collector
-├── prometheus.yml             # Konfigurasi target Prometheus
-└── README.md                  # Dokumentasi ini
+├── ipmi_collector.sh                    # Script utama collector
+├── prometheus.yml                       # Konfigurasi target Prometheus
+├── dashboard-ipmi-bmc-monitoring.json   # Dashboard Grafana custom
+└── README.md                            # Dokumentasi ini
 ```
 
 ## 🛠️ Instalasi
@@ -141,15 +142,58 @@ sudo systemctl start ipmi-collector
 - **Logs**: Check dengan `journalctl -u ipmi-collector`
 - **Status**: `systemctl status ipmi-collector`
 
-## 🎯 Grafana Dashboard
+## 🎯 Grafana Dashboard Custom
 
-Sistem ini kompatibel dengan [Grafana Dashboard ID 13177](https://grafana.com/grafana/dashboards/13177-ipmi-for-prometheus/).
+Sistem ini dilengkapi dengan **Dashboard Grafana Custom** yang sudah dioptimalkan untuk monitoring IPMI BMC.
+
+### Fitur Dashboard Custom
+
+- **Template Variable**: Dropdown untuk memilih server (`$HOST`)
+- **Multi-Panel Layout**: 
+  - Temperature (Stat panel dengan threshold)
+  - Fan Speed (Gauge dengan color coding)
+  - Power Consumption (Gauge dengan threshold)
+  - Voltage (Stat panel)
+- **Threshold Configuration**: 
+  - Temperature: Green < 60°C, Yellow 60-80°C, Red > 80°C
+  - Fan Speed: Red < 1000 RPM, Yellow 1000-3000 RPM, Green 3000-8000 RPM, Blue > 8000 RPM
+  - Power: Green < 500W, Yellow 500-800W, Red > 800W
+- **Auto-refresh**: Template variable refresh setiap kali dashboard di-load
 
 ### Setup Dashboard
 
-1. Import dashboard dengan ID `13177`
-2. Pastikan Prometheus data source sudah dikonfigurasi
-3. Dashboard akan otomatis menampilkan metrics dari semua server
+1. **Import Dashboard**
+   - Buka Grafana
+   - Klik "+" → "Import"
+   - Upload file `dashboard-ipmi-bmc-monitoring.json`
+   - Atau copy-paste JSON content
+
+2. **Konfigurasi Data Source**
+   - Pastikan Prometheus data source sudah dikonfigurasi
+   - Update `uid` data source jika diperlukan (default: `feh0gtg9lkhs0e`)
+
+3. **Template Variable**
+   - Dashboard menggunakan variable `$HOST` untuk memilih server
+   - Variable otomatis ter-populate dari metric `ipmi_bmc_info`
+   - Regex: `.*exported_instance="([^"]+)".*`
+
+### Dashboard Panels
+
+| Panel | Type | Metric | Description |
+|-------|------|--------|-------------|
+| Temperature | Stat | `ipmi_temperature_celsius` | Temperature dengan threshold color coding |
+| Fan Speed | Gauge | `ipmi_fan_speed_rpm` | Kecepatan fan dengan RPM threshold |
+| Power Consumption | Gauge | `ipmi_power_watts` | Konsumsi daya dengan watt threshold |
+| Voltage | Stat | `ipmi_voltage_volts` | Voltage monitoring |
+
+### Customization
+
+Untuk menyesuaikan dashboard:
+
+1. **Threshold Values**: Edit nilai threshold di field config setiap panel
+2. **Colors**: Ubah warna threshold sesuai kebutuhan
+3. **Layout**: Sesuaikan grid position dan size panel
+4. **Time Range**: Default 6 jam, dapat diubah di time picker
 
 ## 🔒 Keamanan
 
@@ -229,4 +273,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-**Note**: Pastikan untuk mengganti placeholder IP dan kredensial sesuai dengan environment Anda sebelum deployment.
+**Note**: Pastikan untuk mengganti placeholder IP dan kredensial sesuai dengan environment Anda sebelum deployment. 
