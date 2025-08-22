@@ -18,6 +18,9 @@ IPMI_Collector/
 ├── ipmi_collector.sh                    # Script utama collector
 ├── prometheus.yml                       # Konfigurasi target Prometheus
 ├── dashboard-ipmi-bmc-monitoring.json   # Dashboard Grafana custom
+├── config/
+│   ├── servers.conf.example             # Contoh konfigurasi server
+│   └── servers.conf                     # Konfigurasi server (tidak di-commit)
 └── README.md                            # Dokumentasi ini
 ```
 
@@ -45,14 +48,16 @@ git clone https://github.com/fkr00t/IPMI_Collector.git
 cd IPMI_Collector
 ```
 
-2. **Konfigurasi server**
-Edit file `ipmi_collector.sh` dan sesuaikan konfigurasi server:
-
+2. **Setup konfigurasi (AMAN)**
 ```bash
-declare -A SERVERS=(
-    ["SERVER-NAME"]="IP:USERNAME:PASSWORD"
-    # Tambahkan server lainnya
-)
+# Copy contoh konfigurasi
+cp config/servers.conf.example config/servers.conf
+
+# Set permissions yang aman
+chmod 600 config/servers.conf
+
+# Edit dengan kredensial Anda
+nano config/servers.conf
 ```
 
 3. **Jalankan collector**
@@ -65,16 +70,22 @@ chmod +x ipmi_collector.sh
 
 ### Server Configuration
 
-Edit bagian `SERVERS` di `ipmi_collector.sh`:
+Edit file `config/servers.conf` dengan kredensial server Anda:
 
 ```bash
 declare -A SERVERS=(
-    ["GG-HCI-N1"]="10.206.31.11:admin:admin"
-    ["GG-HCI-N2"]="10.206.31.12:admin:admin"
-    ["SM-GPU1"]="10.206.31.35:ADMIN:Admin123!"
+    ["SERVER-1"]="192.168.1.10:admin:your_password_here"
+    ["SERVER-2"]="192.168.1.11:admin:your_password_here"
+    ["SERVER-3"]="192.168.1.12:admin:your_password_here"
     # Tambahkan server sesuai kebutuhan
 )
 ```
+
+**⚠️ Keamanan:**
+- File `config/servers.conf` **TIDAK** akan di-commit ke repository
+- Gunakan password yang kuat dan unik untuk setiap server
+- File permissions otomatis diset ke 600 (hanya owner yang bisa baca)
+- Ganti nama server dan IP sesuai dengan environment Anda
 
 ### Prometheus Configuration
 
@@ -206,12 +217,28 @@ Untuk menyesuaikan dashboard:
 
 ### Contoh Konfigurasi Kredensial yang Aman
 
+**Option 1: File Konfigurasi (Recommended)**
+```bash
+# File config/servers.conf
+declare -A SERVERS=(
+    ["SERVER-NAME"]="IP:USERNAME:your_password"
+)
+```
+
+**Option 2: Environment Variables**
 ```bash
 # Gunakan environment variables
 export IPMI_PASSWORD="your_password"
 declare -A SERVERS=(
     ["SERVER-NAME"]="IP:USERNAME:${IPMI_PASSWORD}"
 )
+```
+
+**Option 3: Encrypted Configuration**
+```bash
+# Gunakan gpg untuk enkripsi file konfigurasi
+gpg -e config/servers.conf
+# Kemudian decrypt saat runtime
 ```
 
 ## 🐛 Troubleshooting

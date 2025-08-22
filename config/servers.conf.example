@@ -1,0 +1,20 @@
+# IPMI Server Configuration Example
+# Copy this file to servers.conf and update with your actual server credentials
+# Format: ["SERVER_NAME"]="IP:USERNAME:PASSWORD"
+
+declare -A SERVERS=(
+    # Example servers - replace with your actual servers
+    ["SERVER-1"]="192.168.1.10:admin:your_password_here"
+    ["SERVER-2"]="192.168.1.11:admin:your_password_here"
+    ["SERVER-3"]="192.168.1.12:admin:your_password_here"
+    
+    # Add more servers as needed
+    # ["SERVER-NAME"]="IP_ADDRESS:USERNAME:PASSWORD"
+)
+
+# Configuration Notes:
+# - Replace SERVER-1, SERVER-2, etc. with your actual server names
+# - Replace IP addresses with your actual server IPs
+# - Replace usernames and passwords with your actual credentials
+# - Use strong, unique passwords for each server
+

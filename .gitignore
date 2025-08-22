@@ -37,6 +37,7 @@ ipmi_metrics.prom
 
 # Configuration files with sensitive data
 config.local.sh
+config/servers.conf
 .env
 *.key
 *.pem

@@ -2,41 +2,34 @@
 
 # IPMI Metrics Collector untuk Prometheus
 # Menggunakan ipmitool untuk mengumpulkan data dari BMC servers
-# Kompatibel dengan Dashboard Grafana 13177
+# Kompatibel dengan Dashboard Grafana custom
 
 # Configuration
 COLLECTOR_PORT=8000
 COLLECTION_INTERVAL=30
 
-# Server configuration
-declare -A SERVERS=(
-    ["GG-HCI-N1"]="10.206.31.11:admin:admin"
-    ["GG-HCI-N2"]="10.206.31.12:admin:admin"
-    ["GG-HCI-N3"]="10.206.31.13:admin:admin"
-    ["GG-HCI-N4"]="10.206.31.14:admin:admin"
-    ["GG-GPU1"]="10.206.31.15:ADMIN:Admin123!"
-    ["SM-HCI-N1"]="10.206.31.31:admin:admin"
-    ["SM-HCI-N2"]="10.206.31.32:admin:admin"
-    ["SM-HCI-N3"]="10.206.31.33:admin:admin"
-    ["SM-HCI-N4"]="10.206.31.34:admin:admin"
-    ["SM-GPU1"]="10.206.31.35:ADMIN:Admin123!"
-    ["STG-Storage"]="10.206.31.60:admin:admin"
-    ["Deployment"]="10.206.31.52:superadmin:admin123"
-)
+# Configuration file path
+CONFIG_FILE="config/servers.conf"
 
-# Run ipmitool command
-run_ipmitool() {
-    local server_name="$1"
-    local command="$2"
-    local server_info="${SERVERS[$server_name]}"
-    
-    if [[ -z "$server_info" ]]; then
-        return 1
+# Load server configuration from external file
+load_server_config() {
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        echo "ERROR: Configuration file not found: $CONFIG_FILE"
+        echo "Please create the configuration file with your server credentials."
+        echo "See config/servers.conf.example for reference."
+        exit 1
     fi
     
-    IFS=':' read -r ip user pass <<< "$server_info"
+    # Source the configuration file
+    source "$CONFIG_FILE"
     
-    timeout 30 ipmitool -I lanplus -H "$ip" -U "$user" -P "$pass" $command 2>/dev/null
+    # Validate that SERVERS array is defined
+    if [[ ${#SERVERS[@]} -eq 0 ]]; then
+        echo "ERROR: No servers configured in $CONFIG_FILE"
+        exit 1
+    fi
+    
+    echo "Loaded configuration for ${#SERVERS[@]} servers"
 }
 
 # Parse sensor data and generate Prometheus metrics
@@ -207,6 +200,9 @@ if ! command -v python3 &> /dev/null; then
     echo "ERROR: python3 is not installed. Please install it first."
     exit 1
 fi
+
+# Load server configuration
+load_server_config
 
 # Run main function
 main
