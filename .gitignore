@@ -1,0 +1,47 @@
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Prometheus metrics file
+ipmi_metrics.prom
+
+# Configuration files with sensitive data
+config.local.sh
+.env
+*.key
+*.pem
+
+# Backup files
+*.bak
+*.backup
+*.old
